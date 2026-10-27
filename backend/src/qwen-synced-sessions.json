@@ -1,0 +1,130 @@
+[
+  {
+    "id": "989bb52f-727f-4094-a765-1e7eb531b526",
+    "title": "Landing Page HTML Modern",
+    "timestamp": "27 Okt",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "677e42e7-ff14-4021-b123-7c6b6e616562",
+    "title": "Informasi Cuaca Hari Ini",
+    "timestamp": "27 Okt",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "d508abe6-77c3-4bcf-9c33-e5bc06a05f14",
+    "title": "Simple Greeting",
+    "timestamp": "27 Okt",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "d2cdf9f3-eb21-4336-8b5b-5ce71f5058d2",
+    "title": "Pengembangan Keamanan VPS Wazuh",
+    "timestamp": "18 Okt",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "87bf6aa9-98be-485c-b7a9-69179713316a",
+    "title": "WSL2 Disk Attachment Error",
+    "timestamp": "24 Sep",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "8dfdb7ad-f8b1-4cf6-8c24-7237c5c0b5bf",
+    "title": "Simple Greeting",
+    "timestamp": "19 Agu",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "94cdcfde-7fa0-40ce-8f51-a8ccd65f2631",
+    "title": "Logo Monefy Pengeluaran Rumah Tangga",
+    "timestamp": "17 Jul",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "7b4df2b7-1fd3-4380-b160-cb8eb37b503a",
+    "title": "Multi Role Laravel App",
+    "timestamp": "13 Jul",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "cce2c6d3-f09a-4293-a4ed-98a6fce8097b",
+    "title": "JavaScript Assistance",
+    "timestamp": "29 Apr",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "4948e62b-9c18-47f8-aaea-6966fc294d44",
+    "title": "Clerk Authentication Setup",
+    "timestamp": "18 Mar",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "c45a4bb0-566d-493d-8ca9-63b78350bf5e",
+    "title": "Image Creation Guide",
+    "timestamp": "14 Mar",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "131c5dcb-371e-42b2-b845-8c2d928be528",
+    "title": "Default Avatar Design",
+    "timestamp": "27 Feb",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "f831b848-2c34-497e-b832-c73c42c08fe4",
+    "title": "To-Do List CRUD",
+    "timestamp": "11 Feb",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "d461087a-8794-420d-bcb3-30719a9195a4",
+    "title": "Perbaikan Factory Laravel",
+    "timestamp": "10 Feb",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "1247e469-f0ee-4234-9a83-c3fe892e3d8b",
+    "title": "Integrasi Toolbar Gambar",
+    "timestamp": "4 Feb",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  },
+  {
+    "id": "00b83358-56af-428a-ad0b-a9a6399c5c2b",
+    "title": "To-Do List CRUD Implementation",
+    "timestamp": "3 Feb",
+    "period": "Today",
+    "model": "qwen-3.8-max",
+    "messages": []
+  }
+]

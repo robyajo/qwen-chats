@@ -1,0 +1,321 @@
+{
+  "info": {
+    "_postman_id": "a918e7c4-8392-4f1b-bf88-e9f0a8274610",
+    "name": "Antigravity Web-Chats API",
+    "description": "Koleksi Postman lengkap untuk pengujian backend service Antigravity Web-Chats (Session management, Streaming SSE, Chat completions, File uploads, dan Reactions).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "session-1",
+      "type": "string"
+    },
+    {
+      "key": "messageId",
+      "value": "msg-1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Sessions",
+      "item": [
+        {
+          "name": "1. Get All Chat Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "sessions"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "period",
+                  "value": "Today",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Mengambil seluruh riwayat sesi percakapan untuk ditampilkan pada Sidebar antarmuka."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Create New Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Percakapan Baru\",\n  \"model\": \"gemini-3.8-flash\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "sessions"]
+            },
+            "description": "Membuat sesi percakapan baru saat tombol Percakapan Baru (Cmd/Ctrl+N) diklik."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Delete Session by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/sessions/{{sessionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "sessions", "{{sessionId}}"]
+            },
+            "description": "Menghapus satu sesi percakapan berdasarkan ID sesi."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Clear Messages in Session",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/sessions/{{sessionId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "sessions", "{{sessionId}}", "messages"]
+            },
+            "description": "Mengosongkan semua riwayat pesan di dalam sesi aktif."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chat & Completions",
+      "item": [
+        {
+          "name": "1. Send Message (Server-Sent Events Stream)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{sessionId}}\",\n  \"model\": \"gemini-3.8-flash\",\n  \"message\": {\n    \"role\": \"user\",\n    \"content\": \"Jelaskan arsitektur MessageScroller dan Bubble di shadcn ui.\",\n    \"attachments\": []\n  },\n  \"options\": {\n    \"effort\": \"medium\",\n    \"webSearch\": false,\n    \"deepReasoning\": true,\n    \"temperature\": 0.7\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/stream",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "stream"]
+            },
+            "description": "Mengirim prompt pengguna dan menerima balasan asisten secara streaming token real-time (SSE)."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Send Message (Non-Streaming Completion)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{sessionId}}\",\n  \"model\": \"gemini-3.8-flash\",\n  \"effort\": \"medium\",\n  \"content\": \"Buatkan contoh skrip validasi form dengan Field dan FieldGroup.\",\n  \"attachments\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/completions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "completions"]
+            },
+            "description": "Mengirim prompt dan menerima respon utuh sekaligus tanpa SSE."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attachments",
+      "item": [
+        {
+          "name": "1. Upload File Attachment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "sessionId",
+                  "value": "{{sessionId}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/upload",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "upload"]
+            },
+            "description": "Mengunggah berkas PDF, dokumen, kode, atau gambar untuk dilampirkan pada pesan obrolan."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reactions",
+      "item": [
+        {
+          "name": "1. Toggle Message Reaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emoji\": \"👍\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/messages/{{messageId}}/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "messages", "{{messageId}}", "reactions"]
+            },
+            "description": "Menambahkan atau membatalkan reaksi emoji pada balon pesan tertentu."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Models",
+      "item": [
+        {
+          "name": "1. Get Available AI Models",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/chat/models",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat", "models"]
+            },
+            "description": "Mengambil daftar model AI yang aktif (Antigravity Nova, Gemini 2.5 Pro, Claude 3.7 Sonnet, DeepSeek R1)."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Centralized Config & Endpoints",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/config",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "config"]
+            },
+            "description": "Mengambil konfigurasi terpusat (.env): URL Google Gemini, status OAuth token, email akun, dan model default."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
