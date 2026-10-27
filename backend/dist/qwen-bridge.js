@@ -142,11 +142,13 @@ export async function handleOpenAIChatCompletion(req, res) {
         res.write(`data: ${JSON.stringify(initialChunk)}\n\n`);
         let isClientClosed = false;
         let hasSentDone = false;
-        req.on("close", () => {
-            isClientClosed = true;
+        res.on("close", () => {
+            if (!res.writableEnded) {
+                isClientClosed = true;
+            }
         });
         const sendDone = () => {
-            if (hasSentDone || isClientClosed)
+            if (hasSentDone || res.writableEnded)
                 return;
             hasSentDone = true;
             const finishChunk = {

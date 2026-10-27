@@ -9,6 +9,13 @@ import { AVAILABLE_MODELS, sessionsStore } from "./data.js";
 import { chatWithQwen, streamChatWithQwen, getQwenBridgeDiagnostic, launchQwenDesktopWithCDP } from "./qwen-engine.js";
 import { extractLocalQwenSession } from "./qwen-session-extractor.js";
 import { getOpenAIModelsList, handleOpenAIChatCompletion, renderBridgeDashboardHTML } from "./qwen-bridge.js";
+// Process error safety guards to prevent unexpected service termination
+process.on("unhandledRejection", (reason, promise) => {
+    console.warn("⚠️ Unhandled Promise Rejection at:", promise, "reason:", reason);
+});
+process.on("uncaughtException", (error) => {
+    console.error("⚠️ Uncaught Exception:", error);
+});
 function extractCodeSnippets(text) {
     const snippets = [];
     const codeBlockRegex = /```([a-zA-Z0-9_\-\.]*)\n([\s\S]*?)```/g;
@@ -670,7 +677,11 @@ app.post("/api/chat/stream", async (req, res) => {
     res.end();
 });
 // Start server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Qwen Web-Chats Backend listening on http://localhost:${PORT}`);
     console.log(`📡 Ready for testing at http://localhost:${PORT}/api/chat/sessions`);
 });
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;
+// Prevent event loop from prematurely exiting
+setInterval(() => { }, 1000 * 60 * 60);

@@ -13,6 +13,7 @@ Dokumen ini menjelaskan arsitektur sistem, model-model Qwen yang didukung, cara 
 5. [Integrasi Alibaba Cloud DashScope API](#5-integrasi-alibaba-cloud-dashscope-api)
 6. [Daftar Endpoint API Backend](#6-daftar-endpoint-api-backend)
 7. [Spesifikasi MCP (Model Context Protocol) di Qwen](#7-spesifikasi-mcp-model-context-protocol-di-qwen)
+8. [Local Bridge Server (OpenAI-Compatible Bridge)](#8-local-bridge-server-openai-compatible-bridge)
 
 ---
 
@@ -131,3 +132,38 @@ Aplikasi Qwen Desktop memfasilitasi integrasi MCP melalui jembatan IPC:
 - **`mcp_client_tool_list`**: Membaca perkakas sistem lokal.
 - **`mcp_client_tool_call`**: Memanggil fungsi lokal yang diminta oleh model Qwen.
 - **`bun.exe`** & **`uvx.exe`**: Terpasang di `resources/` untuk menjalankan script MCP lokal secara instan tanpa perlu instalasi runtime global tambahan.
+
+---
+
+## 8. Local Bridge Server (OpenAI-Compatible Bridge)
+
+Local Bridge Server menyediakan antarmuka standar OpenAI (`/v1/chat/completions` dan `/v1/models`) yang menjembatani klien eksternal ke sesi resmi Qwen Desktop menggunakan Chrome DevTools Protocol (CDP port 9222).
+
+### Arsitektur Aliran Kerja:
+
+```
+[ Client / Extension / Python Script ]
+         │
+         ▼ (1) POST /v1/chat/completions { model: "qwen-3.8-max", stream: true }
+[ Local Bridge Server :3004 ]
+         │
+         ▼ (2) CDP WebSocket (ws://127.0.0.1:9222)
+[ Running Qwen Desktop Webview (chat.qwen.ai) ]
+         │  - Memilih model resmi via dropdown UI (.wms-trigger__content)
+         │  - Menginput pesan ke .message-input-textarea
+         │  - Menekan tombol send-button
+         ▼ (3) Mengamati respons token & status thinking secara real-time
+[ Local Bridge Server :3004 ]
+         │
+         ▼ (4) Mengalirkan SSE chunk standar OpenAI (data: {"choices":[{"delta":...}]})
+[ Client ] (Efek mengetik real-time, kompatibel 100% dengan ekosistem OpenAI)
+```
+
+### Daftar Rute Bridge Server:
+
+- `GET /v1/models`: Katalog seluruh model Qwen dalam format `model` OpenAI.
+- `GET /v1/models/:model`: Detail izin dan metadata model spesifik.
+- `POST /v1/chat/completions`: Pemrosesan obrolan streaming SSE (`stream: true`) atau single JSON (`stream: false`).
+- `GET /api/bridge/status`: Pengecekan real-time status port 9222, status koneksi webview, dan model yang sedang aktif di Qwen Desktop.
+- `POST /api/bridge/launch`: Memulai `Qwen.exe` dengan opsi `--remote-debugging-port=9222` jika belum aktif.
+- `GET /bridge` atau `GET /` (via Browser): Antarmuka Dasbor Web interaktif untuk memonitor status bridge, mencoba obrolan cepat (*playground*), dan menyalin petunjuk konfigurasi.

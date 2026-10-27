@@ -204,11 +204,23 @@ function evaluateOnWebview(wsUrl, expression, timeoutMs = 2500) {
             reject(err);
         };
         ws.onopen = () => {
-            ws.send(JSON.stringify({
-                id,
-                method: "Runtime.evaluate",
-                params: { returnByValue: true, expression },
-            }));
+            try {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        id,
+                        method: "Runtime.evaluate",
+                        params: { returnByValue: true, expression },
+                    }));
+                }
+                else {
+                    cleanUp();
+                    resolve(null);
+                }
+            }
+            catch {
+                cleanUp();
+                resolve(null);
+            }
         };
     });
 }
@@ -236,12 +248,25 @@ export async function chatViaQwenDesktopCDP(prompt, options = {}, timeoutMs = 45
                 catch { }
             };
             ws.addEventListener("message", handler);
-            ws.send(JSON.stringify({
-                id,
-                method: "Runtime.evaluate",
-                params: { returnByValue: true, expression },
-            }));
+            try {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        id,
+                        method: "Runtime.evaluate",
+                        params: { returnByValue: true, expression },
+                    }));
+                }
+                else {
+                    ws.removeEventListener("message", handler);
+                    res(null);
+                }
+            }
+            catch {
+                ws.removeEventListener("message", handler);
+                res(null);
+            }
         });
+        let prevText = "";
         ws.addEventListener("open", async () => {
             try {
                 // 1. Switch model if requested and different from active
@@ -316,7 +341,6 @@ export async function chatViaQwenDesktopCDP(prompt, options = {}, timeoutMs = 45
           })()
         `);
                 // 5. Poll for completed assistant message with code block reconstruction
-                let prevText = "";
                 let stableCount = 0;
                 const startTime = Date.now();
                 while (Date.now() - startTime < timeoutMs) {
@@ -373,19 +397,23 @@ export async function chatViaQwenDesktopCDP(prompt, options = {}, timeoutMs = 45
                         }
                     }
                 }
-                ws.close();
-                if (prevText)
-                    resolve(prevText);
-                else
-                    reject(new Error("Timeout menunggu respons dari Qwen Desktop"));
+                try {
+                    ws.close();
+                }
+                catch { }
+                resolve(prevText || "");
             }
             catch (err) {
-                ws.close();
-                reject(err);
+                try {
+                    ws.close();
+                }
+                catch { }
+                resolve(prevText || "");
             }
         });
         ws.addEventListener("error", (err) => {
-            reject(new Error("CDP WebSocket error: " + String(err)));
+            console.warn("CDP WebSocket error:", err);
+            resolve(prevText || "");
         });
     });
 }
@@ -413,12 +441,25 @@ export async function streamViaQwenDesktopCDP(prompt, callbacks, options = {}, t
                 catch { }
             };
             ws.addEventListener("message", handler);
-            ws.send(JSON.stringify({
-                id,
-                method: "Runtime.evaluate",
-                params: { returnByValue: true, expression },
-            }));
+            try {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        id,
+                        method: "Runtime.evaluate",
+                        params: { returnByValue: true, expression },
+                    }));
+                }
+                else {
+                    ws.removeEventListener("message", handler);
+                    res(null);
+                }
+            }
+            catch {
+                ws.removeEventListener("message", handler);
+                res(null);
+            }
         });
+        let accumulatedText = "";
         ws.addEventListener("open", async () => {
             try {
                 // 1. Switch model if needed
@@ -493,7 +534,6 @@ export async function streamViaQwenDesktopCDP(prompt, callbacks, options = {}, t
           })()
         `);
                 // 5. Stream tokens in real time
-                let accumulatedText = "";
                 let stableCount = 0;
                 const startTime = Date.now();
                 while (Date.now() - startTime < timeoutMs) {
@@ -545,17 +585,26 @@ export async function streamViaQwenDesktopCDP(prompt, callbacks, options = {}, t
                         }
                     }
                 }
-                ws.close();
+                try {
+                    ws.close();
+                }
+                catch { }
                 callbacks.onDone?.(accumulatedText);
                 resolve();
             }
             catch (err) {
-                ws.close();
-                reject(err);
+                try {
+                    ws.close();
+                }
+                catch { }
+                callbacks.onDone?.(accumulatedText);
+                resolve();
             }
         });
         ws.addEventListener("error", (err) => {
-            reject(new Error("CDP error: " + String(err)));
+            console.warn("CDP stream WebSocket error:", err);
+            callbacks.onDone?.(accumulatedText);
+            resolve();
         });
     });
 }

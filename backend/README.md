@@ -6,15 +6,15 @@ Backend service berbasis **Express.js & TypeScript** untuk aplikasi **Qwen Web-C
 
 ## 🚀 Fitur Utama
 
-- **Integrasi Qwen AI Models**: Katalog lengkap model Qwen 2.5 (Flagship, Coder, Max, Plus, Turbo, VL).
-- **Real-time SSE Streaming (`/api/chat/stream`)**: Streaming token respons AI dengan fase *thinking*.
-- **Chat Completions (`/api/chat/completions`)**: Pemrosesan pesan non-streaming terstruktur.
-- **Deteksi Qwen Desktop**: Mendeteksi instalasi aplikasi desktop Qwen resmi dan runtime MCP (`bun.exe` / `uvx.exe`) di komputer lokal.
-- **Session Management**: CRUD sesi obrolan (list, create, delete, clear).
-- **Attachment Upload**: Penanganan berkas unggahan dengan `multer`.
-- **Inspeksi Konfigurasi Terpusat (`/api/config`)**: Memantau port server, environment, dan status integrasi.
-
----
+- **OpenAI-Compatible Local Bridge API**:
+  - `POST /v1/chat/completions` (mendukung streaming SSE dan non-streaming JSON).
+  - `GET /v1/models` & `GET /v1/models/:model` (katalog model resmi Qwen).
+  - Kompatibel langsung dengan **Cursor, Cline, Roo Code, Continue.dev, Open WebUI, LangChain, dan skrip Python/Node.js**.
+- **Native Qwen Desktop CDP Bridge**: Menghubungkan otomasi Chrome DevTools Protocol (`--remote-debugging-port=9222`) ke webview Qwen Desktop resmi tanpa WAF Captcha / RGV587 error.
+- **Interactive Bridge Dashboard (`/bridge` atau `http://localhost:3004`)**: UI dasbor web modern untuk memantau status CDP, memilih model, melakukan uji coba chat langsung, dan menyalin panduan konfigurasi.
+- **Deteksi & Auto-Launcher Qwen Desktop**: Mendeteksi biner `Qwen.exe` dan meluncurkannya secara otomatis jika belum berjalan.
+- **Real-time SSE Streaming (`/api/chat/stream`)**: Streaming token respons AI dengan isolasi proses *thinking*.
+- **CRUD Sesi & Ekstraksi Kredensial**: Ekstraksi token DPAPI dan SQLite cookies dari aplikasi desktop.
 
 ## 📁 Struktur Direktori
 
@@ -53,4 +53,66 @@ Server akan berjalan di **`http://localhost:3004`**.
 ```bash
 npm run build
 npm start
+```
+
+---
+
+## 🌐 Local Bridge Server (OpenAI Compatible)
+
+Bridge server ini bertindak sebagai jembatan lokal (*local bridge proxy*) sehingga aplikasi pihak ketiga (seperti Cursor, Cline, Python, dll.) dapat menggunakan model AI Qwen resmi secara gratis melalui sesi login Qwen Desktop Anda.
+
+### 1. Endpoint OpenAI Standar
+
+| Endpoint | Metode | Format | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `/v1/chat/completions` | `POST` | JSON / SSE | Chat completion standar OpenAI |
+| `/v1/models` | `GET` | JSON | Mengambil daftar model Qwen |
+| `/v1/models/:model` | `GET` | JSON | Detail metadata spesifik model |
+| `/api/bridge/status` | `GET` | JSON | Status diagnostik port CDP 9222 & model aktif |
+| `/api/bridge/launch` | `POST` | JSON | Meluncurkan Qwen Desktop dengan remote debugging |
+| `/bridge` | `GET` | HTML | Dashboard interaktif & Playground uji coba |
+
+### 2. Cara Menghubungkan ke Cursor / Cline / Roo Code
+
+Di pengaturan extension / client AI:
+- **API Provider**: `OpenAI Compatible`
+- **Base URL**: `http://localhost:3004/v1`
+- **API Key**: `qwen-local` (bebas/sembarang)
+- **Model ID**: `qwen-3.8-max` atau `qwen-3.7-plus`
+
+### 3. Contoh Penggunaan Python (`openai` library)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:3004/v1",
+    api_key="qwen-local"
+)
+
+# Streaming chat completion
+stream = client.chat.completions.create(
+    model="qwen-3.8-max",
+    messages=[
+        {"role": "user", "content": "Halo Qwen, buatkan fungsi regex email di Python!"}
+    ],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print()
+```
+
+### 4. Contoh Penggunaan cURL
+
+```bash
+curl -X POST http://localhost:3004/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen-3.8-max",
+    "messages": [{"role": "user", "content": "Jelaskan apa itu REST API!"}],
+    "stream": false
+  }'
 ```

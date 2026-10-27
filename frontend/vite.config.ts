@@ -21,6 +21,14 @@ export default defineConfig({
         target: backendUrl,
         changeOrigin: true,
       },
+      "/v1": {
+        target: backendUrl,
+        changeOrigin: true,
+      },
+      "/bridge": {
+        target: backendUrl,
+        changeOrigin: true,
+      },
       "/uploads": {
         target: backendUrl,
         changeOrigin: true,
